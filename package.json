@@ -1,0 +1,12 @@
+{
+  "name": "spsp-be",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/ChihChunHan/spsp-be.git",
+  "author": "hanc.han <chihchun.han@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "uuid": "^9.0.1"
+  }
+}
