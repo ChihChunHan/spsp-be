@@ -1,6 +1,6 @@
 {
   "name": "spsp-be",
-  "type": "module",
+  "type": "commonjs",
   "version": "1.0.0",
   "main": "index.js",
   "repository": "https://github.com/ChihChunHan/spsp-be.git",
