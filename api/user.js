@@ -2,14 +2,21 @@ const app = require("express")();
 const { v4 } = require("uuid");
 const { sql } = require("@vercel/postgres");
 const jwt = require("jsonwebtoken");
+
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 const secretKey = "secret_key";
 
 const authenticate = (req, res, next) => {
+  console.log(req);
   const accessToken = req.headers.authorization;
   const refreshToken = req.cookies.refreshToken;
+
   if (!accessToken && !refreshToken) {
     return res.status(401).json({ message: "Access denied. No token provided." });
   }
+
   try {
     const decoded = jwt.verify(accessToken, secretKey);
     req.user = decoded.user
