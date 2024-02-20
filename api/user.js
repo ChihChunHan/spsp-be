@@ -2,6 +2,8 @@ const app = require("express")();
 const { v4 } = require("uuid");
 const { sql } = require("@vercel/postgres");
 const jwt = require("jsonwebtoken");
+const bodyParser = require('body-parser')
+app.use(bodyParser.json());
 
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
@@ -9,6 +11,20 @@ app.use(cookieParser());
 const secretKey = "secret_key";
 
 const authenticate = (req, res, next) => {
+  const access_token = req.cookies.access_token;
+  if (!access_token) {
+    return res.status(401).json({ message: "Access denied. No token provided." });  
+  }
+
+  try {
+    const data = jwt.verify(access_token, secretKey);
+    return next();
+  } catch (error) {
+    return res.status(400).json({ message: "Invalid token." });
+  }
+};
+
+const _authenticate = (req, res, next) => {
   console.log(req);
   const accessToken = req.headers.authorization;
   const refreshToken = req.cookies.refreshToken;
@@ -45,6 +61,37 @@ app.post("/api/user/protected", authenticate, (req, res) => {
   res.json({ message: "This is a protected route." });
 });
 
+app.post("/api/user/signup", (req, res) => {
+  
+  const {
+    username,
+    email,
+    password
+  } = req.body
+  
+  // return res.status(200).json(req.body)
+
+  const user = {
+    id: 1,
+    user: username
+  }
+
+  sql`INSERT INTO userinfo (username, email, password) VALUES (${username}, ${email}, ${password})`;
+
+  const accessToken = jwt.sign(user, secretKey, { expiresIn: "1h" });
+  const refreshToken = jwt.sign(user, secretKey, { expiresIn: "1d" });
+
+
+
+  res.cookie("access_token", accessToken, {
+    httpOnly: true,
+    sameSite: "strict"
+  }).cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    sameSite: "strict"
+  }).status(200).send({ message: "Signed up." });
+})
+
 app.post("/api/user/login", (req, res) => {
   const user = {
     id: 1,
@@ -52,13 +99,16 @@ app.post("/api/user/login", (req, res) => {
   }
 
   const accessToken = jwt.sign(user, secretKey, { expiresIn: "1h" });
-  const refreshToken = jwt.sign(user, secretKey, { expiresIn: "1d" });
 
-  res.cookie("refreshToken", refreshToken, {
+  res.cookie("access_token", accessToken, {
     httpOnly: true,
     sameSite: "strict"
-  }).header("Authorization", accessToken).send(user)
+  }).status(200).send({ message: "Logged in." });
 });
+
+app.get("/api/user/logout", (req, res) => {
+  return res.clearCookie("access_token").status(200).json({ message: "Logged out." });
+})
 
 app.post("/api/user/refresh", (req, res) => {
   const refreshToken = req.cookies.refreshToken;
@@ -92,4 +142,11 @@ app.post("/api/user/refresh", (req, res) => {
 //   res.json(users);
 // });
 
-module.exports = app;
+// module.exports = app;
+
+// listen to port 3000
+app.listen(3000, () => console.log("Server is running on port 3000"));
+
+
+
+
