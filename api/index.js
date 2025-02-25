@@ -1,6 +1,8 @@
-const app = require("express")();
-const { v4 } = require("uuid");
-const { sql } = require("@vercel/postgres");
+import express from "express";
+import { v4 } from "uuid";
+import { sql } from "@vercel/postgres";
+
+const app = express();
 
 app.get("/api", (req, res) => {
   const path = `/api/item/${v4()}`;
