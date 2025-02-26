@@ -21,4 +21,4 @@ app.get("/api/users", async (req, res) => {
   res.json(users);
 });
 
-export default app
+export default app;
