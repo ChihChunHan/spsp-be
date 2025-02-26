@@ -80,11 +80,18 @@ app.get("/api/accb", authMiddleware, async (req, res) => {
 });
 
 app.post("/api/accb/han/add", authMiddleware, async (req, res) => {
-  await myAccb.push([req.body?.TIME, req.body?.BANK_CODE, req.body?.AMOUNT]);
-  res.status(200).json({
-    message: "added",
-    value: req.body,
-  });
+  try {
+    await myAccb.push([req.body?.TIME, req.body?.BANK_CODE, req.body?.AMOUNT]);
+    res.status(200).json({
+      message: "added",
+      value: req.body,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: "unable to add",
+    });
+  }
 });
 
 if (process.env.IS_DEV) {
