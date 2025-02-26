@@ -46,9 +46,11 @@ class GoogleSheet {
       const range = `${worksheet}!A:A`;
       const readResponse = await this.read(range);
       const currentValues = readResponse.data.values;
+      const startCol = String.fromCharCode(65); // ASCII of A
+      const endCol = String.fromCharCode(startCol + value.length - 1);
       const nextRow = currentValues ? currentValues.length + 1 : 1;
       const response = await this.write(
-        `${worksheet}!A${nextRow}:Z${nextRow}`,
+        `${worksheet}!${startCol}${nextRow}:${endCol}${nextRow}`,
         [value],
       );
       return response;
@@ -59,6 +61,9 @@ class GoogleSheet {
 }
 
 const myAccb = new GoogleSheet("14oKIc5EgiioMOQhlIuTu1pm4Gz0NEYEOcEC3FqGvFVw");
+const homeAccb = new GoogleSheet(
+  "1DGgwXqtVHqud8zO1sm5SsJxCdDTCnCaJw71vj1FmIGE",
+);
 
 const app = express();
 app.use(express.json());
@@ -79,16 +84,46 @@ app.get("/api/accb", authMiddleware, async (req, res) => {
   res.status(200).send("Hello World");
 });
 
+app.post("/api/accb/home/add", authMiddleware, async (req, res) => {
+  try {
+    const { TIME, ACCOUNT, AMOUNT, PAYMENT, CATEGORY, DESCRIPTION } = req.body;
+    await homeAccb.push([
+      TIME,
+      ACCOUNT,
+      AMOUNT,
+      PAYMENT,
+      CATEGORY,
+      DESCRIPTION,
+    ]);
+    // const {
+    //   data: { values },
+    // } = await homeAccb.read("overview!A:Z");
+    // const [bName, , bValue] = values.find(
+    //   (el) => el[1] === req.body?.BANK_CODE,
+    // );
+    // const isNegativeAmount = req.body?.AMOUNT < 0;
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.status(200).send(`[記帳成功]`);
+    // res.status(200).send(`
+    //   [記帳成功] 帳戶：${bName}｜${isNegativeAmount ? "支出" : "收入"}：${req.body?.AMOUNT}｜餘額：${bValue}
+    //   `);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: "unable to add",
+    });
+  }
+});
+
 app.post("/api/accb/han/add", authMiddleware, async (req, res) => {
   try {
-    await myAccb.push([req.body?.TIME, req.body?.BANK_CODE, req.body?.AMOUNT]);
+    const { TIME, BANK_CODE, AMOUNT } = req.body;
+    await myAccb.push([TIME, BANK_CODE, AMOUNT]);
     const {
       data: { values },
     } = await myAccb.read("overview!A:Z");
-    const [bName, , bValue] = values.find(
-      (el) => el[1] === req.body?.BANK_CODE,
-    );
-    const isNegativeAmount = req.body?.AMOUNT < 0;
+    const [bName, , bValue] = values.find((el) => el[1] === BANK_CODE);
+    const isNegativeAmount = AMOUNT < 0;
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.status(200).send(`
       [記帳成功] 帳戶：${bName}｜${isNegativeAmount ? "支出" : "收入"}：${req.body?.AMOUNT}｜餘額：${bValue}
