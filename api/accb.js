@@ -82,10 +82,16 @@ app.get("/api/accb", authMiddleware, async (req, res) => {
 app.post("/api/accb/han/add", authMiddleware, async (req, res) => {
   try {
     await myAccb.push([req.body?.TIME, req.body?.BANK_CODE, req.body?.AMOUNT]);
-    res.status(200).json({
-      message: "added",
-      value: req.body,
-    });
+    const {
+      data: { values },
+    } = await myAccb.read("overview!A:Z");
+    const [bName, , bValue] = values.find(
+      (el) => el[1] === req.body?.BANK_CODE,
+    );
+    const isNegativeAmount = req.body?.AMOUNT < 0;
+    res.status(200).send(`
+      [記帳成功] 帳戶：${bName}｜${isNegativeAmount ? "支出" : "收入"}：${req.body?.AMOUNT}｜餘額：${bValue}
+      `);
   } catch (error) {
     console.log(error);
     res.status(400).json({
