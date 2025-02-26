@@ -46,11 +46,11 @@ class GoogleSheet {
       const range = `${worksheet}!A:A`;
       const readResponse = await this.read(range);
       const currentValues = readResponse.data.values;
-      const startCol = String.fromCharCode(65); // ASCII of A
-      const endCol = String.fromCharCode(startCol + value.length - 1);
+      const endCharCode = value.length - 1 + 65; // ASCII of A
+      const endCol = String.fromCharCode(endCharCode);
       const nextRow = currentValues ? currentValues.length + 1 : 1;
       const response = await this.write(
-        `${worksheet}!${startCol}${nextRow}:${endCol}${nextRow}`,
+        `${worksheet}!A${nextRow}:${endCol}${nextRow}`,
         [value],
       );
       return response;
