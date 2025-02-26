@@ -41,15 +41,20 @@ class GoogleSheet {
     return response;
   }
   async push(value) {
-    const worksheet = "RECORD";
-    const range = `${worksheet}!A:A`;
-    const readResponse = await this.read(range);
-    const currentValues = readResponse.data.values;
-    const nextRow = currentValues ? currentValues.length + 1 : 1;
-    const response = await this.write(`${worksheet}!A${nextRow}:Z${nextRow}`, [
-      value,
-    ]);
-    return response;
+    try {
+      const worksheet = "RECORD";
+      const range = `${worksheet}!A:A`;
+      const readResponse = await this.read(range);
+      const currentValues = readResponse.data.values;
+      const nextRow = currentValues ? currentValues.length + 1 : 1;
+      const response = await this.write(
+        `${worksheet}!A${nextRow}:Z${nextRow}`,
+        [value],
+      );
+      return response;
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
 
@@ -75,7 +80,7 @@ app.get("/api/accb", authMiddleware, async (req, res) => {
 });
 
 app.post("/api/accb/han/add", authMiddleware, async (req, res) => {
-  myAccb.push([req.body?.TIME, req.body?.BANK_CODE, req.body?.AMOUNT]);
+  await myAccb.push([req.body?.TIME, req.body?.BANK_CODE, req.body?.AMOUNT]);
   res.status(200).json({
     message: "added",
     value: req.body,
