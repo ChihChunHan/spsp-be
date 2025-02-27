@@ -42,7 +42,7 @@ class GoogleSheet {
   }
   async push(value) {
     try {
-      const worksheet = "RECORD";
+      const worksheet = "_RECORD";
       const range = `${worksheet}!A:A`;
       const readResponse = await this.read(range);
       const currentValues = readResponse.data.values;
@@ -86,7 +86,7 @@ app.get("/api/accb", authMiddleware, async (req, res) => {
   res.status(200).send("Hello World");
 });
 
-app.post("/api/accb/home/add", authMiddleware, async (req, res) => {
+app.post("/api/accb/home", authMiddleware, async (req, res) => {
   try {
     const RECORDER = req._recorder;
     const { TIME, AMOUNT, ACCOUNT, CATEGORY } = req.body;
@@ -111,7 +111,7 @@ app.post("/api/accb/home/add", authMiddleware, async (req, res) => {
   }
 });
 
-app.post("/api/accb/han/add", authMiddleware, async (req, res) => {
+app.post("/api/accb/han", authMiddleware, async (req, res) => {
   try {
     const { TIME, BANK_CODE, AMOUNT } = req.body;
     await myAccb.push([TIME, BANK_CODE, AMOUNT]);
