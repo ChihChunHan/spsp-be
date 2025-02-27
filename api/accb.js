@@ -102,7 +102,7 @@ app.post("/api/accb/home/add", authMiddleware, async (req, res) => {
       data: {
         values: [oCash, oSpend],
       },
-    } = await myAccb.read("overview!B:B");
+    } = await homeAccb.read("overview!B:B");
     const formattedAmount = new Intl.NumberFormat("zh-TW").format(AMOUNT);
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.status(200).send(`
