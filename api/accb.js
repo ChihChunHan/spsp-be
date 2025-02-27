@@ -71,9 +71,11 @@ app.use(express.json());
 const tokens = ["han", "jan"];
 // Create the middleware function
 const authMiddleware = (req, res, next) => {
-  if (tokens.includes(req?.headers?.["h-auth"])) {
+  const hAuth = req?.headers?.["h-auth"] ?? "";
+  if (tokens.includes(hAuth)) {
+    req._recorder = tokens.indexOf(hAuth);
     // Auth successful, continue to the next middleware or route handler
-    next({ recorder: req?.headers?.["h-auth"] == "han" ? 0 : 1 });
+    next();
   } else {
     // Auth failed, send 401 Unauthorized response
     res.status(401).send("Unauthorized");
@@ -86,7 +88,7 @@ app.get("/api/accb", authMiddleware, async (req, res) => {
 
 app.post("/api/accb/home/add", authMiddleware, async (req, res) => {
   try {
-    const RECORDER = req.recorder;
+    const RECORDER = req._recorder;
     const { TIME, AMOUNT, ACCOUNT, CATEGORY, DESCRIPTION } = req.body;
     await homeAccb.push([
       TIME,
