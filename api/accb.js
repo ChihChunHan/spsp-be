@@ -89,15 +89,8 @@ app.get("/api/accb", authMiddleware, async (req, res) => {
 app.post("/api/accb/home/add", authMiddleware, async (req, res) => {
   try {
     const RECORDER = req._recorder;
-    const { TIME, AMOUNT, ACCOUNT, CATEGORY, DESCRIPTION } = req.body;
-    await homeAccb.push([
-      TIME,
-      AMOUNT,
-      ACCOUNT,
-      CATEGORY,
-      DESCRIPTION,
-      RECORDER,
-    ]);
+    const { TIME, AMOUNT, ACCOUNT, CATEGORY } = req.body;
+    await homeAccb.push([TIME, AMOUNT, ACCOUNT, CATEGORY, RECORDER]);
     const {
       data: {
         values: [oCash, oSpend],
