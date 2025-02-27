@@ -68,12 +68,12 @@ const homeAccb = new GoogleSheet(
 const app = express();
 app.use(express.json());
 
-const token = "1234";
+const tokens = ["han", "jan"];
 // Create the middleware function
 const authMiddleware = (req, res, next) => {
-  if (req?.headers?.["h-auth"] === token) {
+  if (tokens.includes(req?.headers?.["h-auth"])) {
     // Auth successful, continue to the next middleware or route handler
-    next();
+    next({ recorder: req?.headers?.["h-auth"] == "han" ? 0 : 1 });
   } else {
     // Auth failed, send 401 Unauthorized response
     res.status(401).send("Unauthorized");
@@ -86,12 +86,27 @@ app.get("/api/accb", authMiddleware, async (req, res) => {
 
 app.post("/api/accb/home/add", authMiddleware, async (req, res) => {
   try {
-    const { TIME, AMOUNT, ACCOUNT, CATEGORY, ...ext } = req.body;
-    await homeAccb.push([TIME, AMOUNT, ACCOUNT, CATEGORY, Object.values(ext)]);
+    const RECORDER = req.recorder;
+    const { TIME, AMOUNT, ACCOUNT, CATEGORY, DESCRIPTION } = req.body;
+    await homeAccb.push([
+      TIME,
+      AMOUNT,
+      ACCOUNT,
+      CATEGORY,
+      DESCRIPTION,
+      RECORDER,
+    ]);
+    const {
+      data: {
+        values: [oCash, oSpend],
+      },
+    } = await myAccb.read("overview!B:B");
+    const formattedAmount = new Intl.NumberFormat("zh-TW").format(AMOUNT);
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.status(200).send(`
       [記帳成功] 家庭帳簿
-      ${AMOUNT < 0 ? "支出" : "收入"}：${req.body?.AMOUNT}
+      ${AMOUNT < 0 ? "支出" : "收入"}：NT$${formattedAmount}
+      本月已花費：${oSpend}｜現金餘額：${oCash}
       `);
   } catch (error) {
     console.log(error);
@@ -109,8 +124,8 @@ app.post("/api/accb/han/add", authMiddleware, async (req, res) => {
       data: { values },
     } = await myAccb.read("overview!A:Z");
     const [bName, , bValue] = values.find((el) => el[1] === BANK_CODE);
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
     const formattedAmount = new Intl.NumberFormat("zh-TW").format(AMOUNT);
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.status(200).send(`
       [記帳成功] 帳戶：${bName}
       ${AMOUNT < 0 ? "支出" : "收入"}：NT$${formattedAmount}
