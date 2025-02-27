@@ -125,9 +125,9 @@ app.post("/api/accb/han/add", authMiddleware, async (req, res) => {
     const [bName, , bValue] = values.find((el) => el[1] === BANK_CODE);
     const isNegativeAmount = AMOUNT < 0;
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.status(200).send(`
-      [記帳成功] 帳戶：${bName}｜${isNegativeAmount ? "支出" : "收入"}：${req.body?.AMOUNT}｜餘額：${bValue}
-      `);
+    res.status(200).send(`[記帳成功] 帳戶：${bName}
+      ${isNegativeAmount ? "支出" : "收入"}：${req.body?.AMOUNT}
+      餘額：${bValue}`);
   } catch (error) {
     console.log(error);
     res.status(400).json({
