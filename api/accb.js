@@ -86,27 +86,13 @@ app.get("/api/accb", authMiddleware, async (req, res) => {
 
 app.post("/api/accb/home/add", authMiddleware, async (req, res) => {
   try {
-    const { TIME, ACCOUNT, AMOUNT, PAYMENT, CATEGORY, DESCRIPTION } = req.body;
-    await homeAccb.push([
-      TIME,
-      ACCOUNT,
-      AMOUNT,
-      PAYMENT,
-      CATEGORY,
-      DESCRIPTION,
-    ]);
-    // const {
-    //   data: { values },
-    // } = await homeAccb.read("overview!A:Z");
-    // const [bName, , bValue] = values.find(
-    //   (el) => el[1] === req.body?.BANK_CODE,
-    // );
-    // const isNegativeAmount = req.body?.AMOUNT < 0;
+    const { TIME, AMOUNT, ACCOUNT, CATEGORY, ...ext } = req.body;
+    await homeAccb.push([TIME, AMOUNT, ACCOUNT, CATEGORY, Object.values(ext)]);
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.status(200).send(`[記帳成功]`);
-    // res.status(200).send(`
-    //   [記帳成功] 帳戶：${bName}｜${isNegativeAmount ? "支出" : "收入"}：${req.body?.AMOUNT}｜餘額：${bValue}
-    //   `);
+    res.status(200).send(`
+      [記帳成功] 家庭帳簿
+      ${AMOUNT < 0 ? "支出" : "收入"}：${req.body?.AMOUNT}
+      `);
   } catch (error) {
     console.log(error);
     res.status(400).json({
@@ -123,11 +109,13 @@ app.post("/api/accb/han/add", authMiddleware, async (req, res) => {
       data: { values },
     } = await myAccb.read("overview!A:Z");
     const [bName, , bValue] = values.find((el) => el[1] === BANK_CODE);
-    const isNegativeAmount = AMOUNT < 0;
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.status(200).send(`[記帳成功] 帳戶：${bName}
-      ${isNegativeAmount ? "支出" : "收入"}：${req.body?.AMOUNT}
-      餘額：${bValue}`);
+    const formattedAmount = new Intl.NumberFormat("zh-TW").format(AMOUNT);
+    res.status(200).send(`
+      [記帳成功] 帳戶：${bName}
+      ${AMOUNT < 0 ? "支出" : "收入"}：NT$${formattedAmount}
+      餘額：${bValue}
+      `);
   } catch (error) {
     console.log(error);
     res.status(400).json({
