@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/api/accb/(.*)", "destination": "/api/accb" },
+    { "source": "/api/mrt/(.*)", "destination": "/api/mrt" },
     { "source": "/api/user/(.*)", "destination": "/api/user" }
   ]
 }
