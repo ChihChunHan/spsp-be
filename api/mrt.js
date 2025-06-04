@@ -397,11 +397,15 @@ app.get("/api/mrt", (req, res) => {
     }
   }
 
+  const nowStr = `${hour.toString().padStart(2, "0")}:${minute
+    .toString()
+    .padStart(2, "0")}`;
+
   if (!found) {
-    res.status(200).json({ message: "No more trains today" });
+    res.status(200).json({ message: "No more trains today", now: nowStr });
     return;
   }
-  res.status(200).json(found);
+  res.status(200).json({ ...found, now: nowStr });
 });
 
 if (process.env.IS_DEV) {
