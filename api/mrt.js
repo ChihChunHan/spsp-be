@@ -355,9 +355,28 @@ app.get("/api/mrt", (req, res) => {
     return;
   }
 
-  // 決定今天是平日、六、日
+  // 取得台北時區現在時間
   const now = new Date();
-  const day = now.getDay();
+  const tz = "Asia/Taipei";
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    weekday: "short",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const parts = fmt.formatToParts(now);
+  const hour = Number(parts.find((p) => p.type === "hour").value);
+  const minute = Number(parts.find((p) => p.type === "minute").value);
+  const weekday = parts.find((p) => p.type === "weekday").value;
+  const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(
+    weekday,
+  );
+
   let dayKey;
   if (day === 0) dayKey = "sunday_and_holidays";
   else if (day === 6) dayKey = "saturday";
@@ -365,7 +384,7 @@ app.get("/api/mrt", (req, res) => {
 
   const times = timetable[destKey][dayKey];
   // 取得現在時間（分鐘）
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const nowMinutes = hour * 60 + minute;
 
   // 找下一班
   let found = null;
