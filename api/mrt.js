@@ -133,7 +133,7 @@ const timetable = {
 const app = express();
 app.use(express.json());
 
-app.get("/api/mrt", (req, res) => {
+app.get("/api/mrt/next", (req, res) => {
   const { to } = req.query;
   let destKey;
   if (to === "xbt") destKey = "toXBT";
@@ -166,7 +166,8 @@ app.get("/api/mrt", (req, res) => {
   );
 
   let dayKey;
-  if (day === 0) dayKey = "sunday_and_holiday";
+  if (req.query.isHoliday === "1") dayKey = "sunday_and_holiday";
+  else if (day === 0) dayKey = "sunday_and_holiday";
   else if (day === 6) dayKey = "saturday";
   else dayKey = "weekdays";
 
@@ -201,6 +202,19 @@ app.get("/api/mrt", (req, res) => {
     return;
   }
   res.status(200).json({ ...found, now: nowStr });
+});
+
+app.get("/api/mrt/timetable", () => {});
+
+app.get("/api/mrt/timetable", (req, res) => {
+  const { to } = req.query;
+  if (to === "qz") {
+    res.redirect(302, "https://web.metro.taipei/img/ALL/timetables/032.PDF");
+  } else if (to === "xbt") {
+    res.redirect(302, "https://web.metro.taipei/img/ALL/timetables/035.PDF");
+  } else {
+    res.status(400).json({ error: "Invalid or missing 'to' parameter" });
+  }
 });
 
 if (process.env.IS_DEV) {
