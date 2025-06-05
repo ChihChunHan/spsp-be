@@ -209,9 +209,9 @@ app.get("/api/mrt/timetable", () => {});
 app.get("/api/mrt/timetable", (req, res) => {
   const { to } = req.query;
   if (to === "qz") {
-    res.redirect(302, "https://web.metro.taipei/img/ALL/timetables/032.PDF");
+    res.json({ url: "https://web.metro.taipei/img/ALL/timetables/032.PDF" });
   } else if (to === "xbt") {
-    res.redirect(302, "https://web.metro.taipei/img/ALL/timetables/035.PDF");
+    res.json({ url: "https://web.metro.taipei/img/ALL/timetables/035.PDF" });
   } else {
     res.status(400).json({ error: "Invalid or missing 'to' parameter" });
   }
