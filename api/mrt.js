@@ -204,14 +204,12 @@ app.get("/api/mrt/next", (req, res) => {
   res.status(200).json({ ...found, now: nowStr });
 });
 
-app.get("/api/mrt/timetable", () => {});
-
 app.get("/api/mrt/timetable", (req, res) => {
   const { to } = req.query;
   if (to === "qz") {
-    res.json({ url: "https://web.metro.taipei/img/ALL/timetables/032.PDF" });
+    res.redirect(302, "https://web.metro.taipei/img/ALL/timetables/032.PDF");
   } else if (to === "xbt") {
-    res.json({ url: "https://web.metro.taipei/img/ALL/timetables/035.PDF" });
+    res.redirect(302, "https://web.metro.taipei/img/ALL/timetables/035.PDF");
   } else {
     res.status(400).json({ error: "Invalid or missing 'to' parameter" });
   }
